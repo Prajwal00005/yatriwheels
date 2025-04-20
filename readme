@@ -1,0 +1,43 @@
+import { response } from "express"
+
+auth
+
+/register 
+/login
+//jwt
+//verify
+
+//vehicles/
+// /create /merchant
+// /delete /admin/who create
+// update/admin/ who create
+// getById/user
+// get/user
+// filter
+// limit
+
+
+// user 
+
+
+// Registration Flow:
+// Receive Registration Request:
+
+// Validate the Data:
+
+// services 
+// Check if the email is already in use. 
+
+// Hash the Password:
+
+
+// Store User Data:
+
+// Save the new user in the database with the hashed password and other details.
+// Generate JWT Token:
+
+// Set JWT in Cookie:
+
+// Send Success Response:
+
+// Return a success message along with basic user info (name, email).

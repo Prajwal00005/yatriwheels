@@ -1,0 +1,5 @@
+const ROLE_USER = "USER";
+const ROLE_ADMIN = "ADMIN";
+const ROLE_MERCHANT = "MERCHANT";
+
+module.exports = {ROLE_ADMIN, ROLE_MERCHANT, ROLE_USER};
