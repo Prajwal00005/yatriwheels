@@ -134,20 +134,14 @@ const authServices = require('../services/authServices')
 const { createJwt } = require('../utils/JWT')
 
 // Helper function to send a standardized bad request response
-function sendBadRequest (res, { message, field }) {
-  res.status(422).json({
-    message,
-    field
-  })
-}
 
 const register = async (req, res) => {
   try {
     const { name, address, phone, email, password, confirmPassword, roles } =
       req.body
 
-    // const { file } = req.file
-    // console.log(req.body)
+    const file = req.file
+    // console.log(file)
 
     // Validation checks
     if (!name)
@@ -194,10 +188,11 @@ const register = async (req, res) => {
       })
 
     // Call service to store the user in the DB
+    // console.log(file)
     const user = await authServices.registerServices({
       ...req.body,
-      roles: ['USER']
-      // file
+      roles: ['USER'],
+      file
     })
 
     // Format user data
@@ -228,6 +223,8 @@ const register = async (req, res) => {
 const login = async (req, res) => {
   try {
     const { email, phone, password } = req.body
+
+    // console.log(object)
 
     // Check if required fields are provided
     if (!email && !phone) {

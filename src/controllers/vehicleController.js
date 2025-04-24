@@ -6,7 +6,7 @@ exports.createVehicle = async (req, res) => {
     const data = JSON.parse(JSON.stringify(req.body))
 
     // console.log(userId)
-    console.log(req.file)
+    // console.log(req.file)
 
     const response = await vehicleServices.createVehicle(data, userId, req.file)
 
@@ -122,6 +122,43 @@ exports.deleteVehicle = async (req, res) => {
     res.status(400).json({
       sucess: false,
       message: e.message
+    })
+  }
+}
+
+exports.getVehiclesByUser = async (req, res) => {
+  try {
+    const userId = req.user.id
+
+    // Fetch vehicles created by the user
+    const vehicles = await vehicleServices.getVehiclesByUserId(userId)
+
+    // Check if vehicles exist
+    if (!vehicles || vehicles.length === 0) {
+      return res.status(404).send('No vehicles found for this user')
+    }
+
+    // Authorization check: ensure user is the creator or an admin
+    // Note: Since getVehiclesByUserId already filters by userId, this check is redundant
+    // but included for consistency with updateVehicle logic
+    const unauthorized = vehicles.some(
+      vehicle =>
+        vehicle.createdBy.toString() !== userId &&
+        !req.user.roles.includes('ADMIN')
+    )
+    if (unauthorized) {
+      return res.status(403).send('Access denied')
+    }
+
+    res.status(200).json({
+      success: 'OK',
+      message: 'Vehicles retrieved successfully',
+      data: vehicles
+    })
+  } catch (e) {
+    res.status(400).json({
+      success: false,
+      message: e.message || 'Failed to fetch vehicles'
     })
   }
 }

@@ -1,8 +1,8 @@
 const roleBasedAuth = role => {
   return (req, res, next) => {
-    // console.log(role)
+    console.log(role)
     const user = req.user
-    // console.log(user)
+    console.log(user)
     // Make sure user exists and has roles
     if (!user || !user.roles) {
       return res.status(401).send('UnAuthorized')

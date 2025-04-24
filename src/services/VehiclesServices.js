@@ -57,3 +57,12 @@ exports.getVehiclesById = async id => {
 exports.deleteVehicle = async id => {
   return await Vehicle.findByIdAndDelete(id)
 }
+
+exports.getVehiclesByUserId = async userId => {
+  try {
+    const vehicles = await Vehicle.find({ createdBy: userId }).exec()
+    return vehicles
+  } catch (error) {
+    throw new Error('Failed to fetch vehicles by user')
+  }
+}
