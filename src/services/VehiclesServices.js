@@ -13,8 +13,12 @@ exports.createVehicle = async (data, userId, file) => {
   return response
 }
 
-exports.updateVehicle = async (data, id) => {
-  return await Vehicle.findByIdAndUpdate(id, data, { new: true })
+exports.updateVehicle = async (id, data) => {
+  const updatedVehicle = await Vehicle.findByIdAndUpdate(id, data, {
+    new: true
+  })
+
+  return updatedVehicle
 }
 
 exports.getVehicles = async query => {
@@ -29,7 +33,7 @@ exports.getVehicles = async query => {
   if (minPrice) filters.minPrice = { $gt: minPrice }
 
   if (categorys) {
-    const categoryItems = categorys.split(',')
+    const categoryItems = categorys
 
     filters.category = { $in: categoryItems }
   }
@@ -45,6 +49,7 @@ exports.getVehicles = async query => {
     .sort(sort) // Sort the results based on your sort parameter
     .limit(limit) // Limit the number of documents returned
     .skip(offset)
+    .where('vehicleStatus', true)
   // Skip documents based on offset (for pagination)
 
   return vehicles

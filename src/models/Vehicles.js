@@ -35,6 +35,10 @@ const VehicleSchema = new mongoose.Schema(
       required: true,
       min: 1
     },
+    vehicleStatus: {
+      type: Boolean,
+      default: true
+    },
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',

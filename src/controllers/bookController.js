@@ -1,5 +1,5 @@
 const bookingService = require('../services/bookServices') // Fixed file name
-
+const vehicleService = require('../services/VehiclesServices')
 exports.getAllBookings = async (req, res) => {
   try {
     const bookings = await bookingService.getAllBookings(req.query)
@@ -33,7 +33,6 @@ exports.getBookingById = async (req, res) => {
 exports.createBooking = async (req, res) => {
   const input = { ...req.body, user: req.body.user || req.user.id }
 
-  console.log(req.user)
   // Validation
   if (!input.vehicle)
     return res.status(422).json({ message: 'Vehicle is required' })
@@ -48,6 +47,13 @@ exports.createBooking = async (req, res) => {
 
   try {
     const booking = await bookingService.createBooking(input)
+
+    if (booking) {
+      await vehicleService.updateVehicle(
+        { vehicleStatus: false },
+        input.vehicle
+      )
+    }
     res.status(201).json(booking)
   } catch (error) {
     res.status(error.statusCode || 500).json({ message: error.message })
@@ -97,5 +103,146 @@ exports.extendBooking = async (req, res) => {
     res.json(updatedBooking)
   } catch (error) {
     res.status(error.statusCode || 500).json({ message: error.message })
+  }
+}
+
+exports.getOwnBooking = async (req, res) => {
+  try {
+    const user = req.user
+    const bookings = await bookingService.getOwnBooking(user)
+
+    if (!bookings || bookings.length === 0) {
+      return res.status(404).json({ message: 'No booking or vehicle found' })
+    }
+
+    // Filter and map the bookings
+    const bookingsList = bookings.filter(booking => {
+      return booking?.vehicle?.createdBy.toString() === user.id
+    })
+
+    if (bookingsList.length === 0) {
+      return res.status(403).json({ message: 'Access denied' })
+    }
+
+    res.status(200).json({
+      success: 'OK',
+      message: 'Vehicles retrieved successfully',
+      data: bookingsList
+    })
+  } catch (e) {
+    console.error(e)
+    res.status(500).json({ message: 'Server error' })
+  }
+}
+
+exports.RejectBooking = async (req, res) => {
+  try {
+    const id = req.params.id
+
+    const bookings = await bookingService.getBookingById(id)
+    if (!bookings) {
+      return res.status(400).json({ message: 'Booking not available' })
+    }
+
+    console.log('Booking found:', bookings)
+
+    // Set vehicleStatus to FALSE (unavailable) on rejection
+    const updatedVehicle = await vehicleService.updateVehicle(
+      bookings.vehicle._id,
+      {
+        vehicleStatus: true
+      }
+    )
+    console.log('Vehicle updated:', updatedVehicle)
+
+    const updatedBooking = await bookingService.updateBookingStatus(id, {
+      status: 'cancelled'
+    })
+
+    console.log('Booking status updated:', updatedBooking)
+
+    return res.status(200).json({
+      message: 'Booking rejected ',
+      booking: updatedBooking,
+      vehicle: updatedVehicle
+    })
+  } catch (e) {
+    console.error('Error rejecting booking:', e)
+
+    return res.status(500).json({ message: e.message })
+  }
+}
+
+exports.confirmBooking = async (req, res) => {
+  try {
+    const id = req.params.id // FIXED
+
+    const bookings = await bookingService.getBookingById(id)
+
+    if (!bookings) {
+      return res.status(400).json({ message: 'Booking not available' })
+    }
+
+    console.log('Booking found:', bookings)
+
+    // Set vehicle to unavailable
+    const updatedVehicle = await vehicleService.updateVehicle(
+      bookings.vehicle._id,
+      {
+        vehicleStatus: false
+      }
+    )
+
+    // Update booking status to 'confirmed'
+    const updatedBooking = await bookingService.updateBookingStatus(id, {
+      status: 'confirmed'
+    })
+
+    return res.status(200).json({
+      message: 'Booking confirmed',
+      booking: updatedBooking,
+      vehicle: updatedVehicle
+    })
+  } catch (e) {
+    console.error('Error confirming booking:', e)
+
+    return res.status(500).json({ message: e.message })
+  }
+}
+
+exports.completedBooking = async (req, res) => {
+  try {
+    const id = req.params.id // FIXED
+
+    const bookings = await bookingService.getBookingById(id)
+
+    if (!bookings) {
+      return res.status(400).json({ message: 'Booking not available' })
+    }
+
+    console.log('Booking found:', bookings)
+
+    // Set vehicle to unavailable
+    const updatedVehicle = await vehicleService.updateVehicle(
+      bookings.vehicle._id,
+      {
+        vehicleStatus: true
+      }
+    )
+
+    // Update booking status to 'confirmed'
+    const updatedBooking = await bookingService.updateBookingStatus(id, {
+      status: 'completed'
+    })
+
+    return res.status(200).json({
+      message: 'Booking completed ',
+      booking: updatedBooking,
+      vehicle: updatedVehicle
+    })
+  } catch (e) {
+    console.error('Error confirming booking:', e)
+
+    return res.status(500).json({ message: e.message })
   }
 }

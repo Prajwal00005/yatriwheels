@@ -154,8 +154,9 @@ exports.createMerchant = async (req, res) => {
       throw new Error('Password is required to create a merchant.')
     }
 
-    const hashedPassword = bcrypt.hashSync(data.password) // Ensure 'data.password' exists
-    data.password = hashedPassword
+    // const hashedPassword = bcrypt.hashSync(data.password) // Ensure 'data.password' exists
+    // data.password = hashedPassword
+    // User.save()
 
     console.log(req.file)
     const user = await userServices.createMerchant(data, file)

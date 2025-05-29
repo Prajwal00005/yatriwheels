@@ -18,7 +18,7 @@ const router = express.Router()
 router.post(
   '/create',
   auth,
-  roleBasedAuth('ADMIN'),
+  roleBasedAuth('MERCHANT'),
   upload.single('image'),
   createVehicle
 )

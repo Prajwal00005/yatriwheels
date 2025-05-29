@@ -240,6 +240,7 @@ const login = async (req, res) => {
       })
     }
 
+    console.log(password)
     // Call the login service to verify credentials
     const user = await authServices.loginServices(req.body)
 
