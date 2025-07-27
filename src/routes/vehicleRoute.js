@@ -25,7 +25,7 @@ router.post(
 router.patch('/update/:id', auth, roleBasedAuth('MERCHANT'), updateVehicle)
 router.get('/vehicles', auth, Vehicle)
 router.get('/vehicle/:id', auth, VehicleById)
-router.delete('/delete/:id', auth, roleBasedAuth('ADMIN'), deleteVehicle)
+router.delete('/delete/:id', auth, roleBasedAuth('MERCHANT'), deleteVehicle)
 router.get('/Vehicle', auth, roleBasedAuth('MERCHANT'), getVehiclesByUser)
 
 module.exports = router

@@ -6,6 +6,7 @@ const vehicleRoutes = require('./routes/vehicleRoute')
 const userRoutes = require('./routes/userRoute')
 const bookRoute = require('./routes/bookroutes')
 const paymentRoute = require('./routes/paymentroutes')
+const fineRoutes = require('./routes/fineRoutes')
 const path = require('path')
 const app = express()
 var cors = require('cors')
@@ -32,8 +33,8 @@ app.use('/api/v1/auth', authroute)
 app.use('/api/v1/', vehicleRoutes)
 app.use('/api/v1/', userRoutes)
 app.use('/api/v1/', bookRoute)
-app.use('/api/v1/', paymentRoute)
-
+app.use('/api/v1', paymentRoute)
+app.use('/api/v1', fineRoutes)
 // app.use(handleError)
 
 app.listen(PORT, () => {

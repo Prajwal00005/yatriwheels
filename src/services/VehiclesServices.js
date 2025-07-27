@@ -22,21 +22,28 @@ exports.updateVehicle = async (id, data) => {
 }
 
 exports.getVehicles = async query => {
-  const sort = JSON.parse(query.sort || '{} ')
-  const limit = query.limit || 10
-  const offset = query.offset
+  const sort = JSON.parse(query.sort || '{}')
+  const limit = parseInt(query.limit) || 10
+  const offset = parseInt(query.offset) || 0
 
-  const { categorys, name, minPrice } = query
+  const { categorys, name, minPrice, maxPrice } = query
 
   const filters = {}
 
-  if (minPrice) filters.minPrice = { $gt: minPrice }
+  // Handle price range
+  if (minPrice || maxPrice) {
+    filters.price = {}
+    if (minPrice) filters.price.$gte = parseFloat(minPrice)
+    if (maxPrice) filters.price.$lte = parseFloat(maxPrice)
+  }
 
+  // Handle categories
   if (categorys) {
-    const categoryItems = categorys
-
+    const categoryItems = Array.isArray(categorys) ? categorys : [categorys]
     filters.category = { $in: categoryItems }
   }
+
+  // Handle name search
   if (name) {
     filters.name = {
       $regex: name,
@@ -44,13 +51,17 @@ exports.getVehicles = async query => {
     }
   }
 
-  const vehicles = await Vehicle.find(filters) // Apply filters to the query
-    .populate('createdBy', ['name']) // Populate the 'createdBy' field, which is the correct name
-    .sort(sort) // Sort the results based on your sort parameter
-    .limit(limit) // Limit the number of documents returned
+  console.log('🚀 Backend Query Params:', query)
+  console.log('🚀 Backend Filters Applied:', filters)
+
+  const vehicles = await Vehicle.find(filters)
+    .populate('createdBy', ['name'])
+    .sort(sort)
+    .limit(limit)
     .skip(offset)
     .where('vehicleStatus', true)
-  // Skip documents based on offset (for pagination)
+
+  console.log('🚀 Vehicles Found:', vehicles.length, 'vehicles')
 
   return vehicles
 }

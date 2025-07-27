@@ -1,4 +1,5 @@
 const mongoose = require('mongoose')
+
 const bookingSchema = new mongoose.Schema({
   user: {
     type: mongoose.Types.ObjectId,
@@ -26,7 +27,13 @@ const bookingSchema = new mongoose.Schema({
     type: Number,
     required: true
   },
-
+  actualReturnDate: {
+    type: Date
+  },
+  fine: {
+    type: Number,
+    default: 0
+  },
   status: {
     type: String,
     default: 'pending',
@@ -38,6 +45,4 @@ const bookingSchema = new mongoose.Schema({
   }
 })
 
-const Booking = mongoose.model('Booking', bookingSchema)
-
-module.exports = Booking
+module.exports = mongoose.model('Booking', bookingSchema)

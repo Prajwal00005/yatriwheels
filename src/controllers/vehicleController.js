@@ -29,18 +29,21 @@ exports.createVehicle = async (req, res) => {
 
 exports.Vehicle = async (req, res) => {
   try {
-    const vehicle = await vehicleServices.getVehicles(req.query)
-
-    if (!vehicle) res.status(404).send('vehicles not found')
-
+    const vehicles = await vehicleServices.getVehicles(req.query)
+    if (!vehicles || vehicles.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: 'No vehicles found'
+      })
+    }
     res.status(200).json({
-      sucess: 'OK',
-      message: 'Product Fetched sucessfully',
-      data: vehicle
+      success: true,
+      message: 'Vehicles fetched successfully',
+      data: vehicles
     })
   } catch (e) {
     res.status(400).json({
-      sucess: false,
+      success: false,
       message: e.message
     })
   }
@@ -52,7 +55,9 @@ exports.VehicleById = async (req, res) => {
 
     const vehicle = await vehicleServices.getVehiclesById(id)
 
-    if (!vehicle) res.status(404).send('vehicles not found')
+    if (!vehicle) {
+      return res.status(404).send('vehicles not found')
+    }
 
     res.status(200).json({
       sucess: 'OK',
@@ -74,13 +79,11 @@ exports.updateVehicle = async (req, res) => {
     const product = await vehicleServices.getVehiclesById(id)
 
     if (!product) res.status(400).send('products not Found')
-    console.log(product.createdBy)
-    console.log(userId)
 
     if (product.createdBy != userId && !user.roles.includes('ADMIN'))
       res.status(403).send('access denied')
 
-    const response = await vehicleServices.updateVehicle(req.body, id)
+    const response = await vehicleServices.updateVehicle(id, req.body)
 
     if (!response) return res.status(404).send('products update failed')
 
@@ -101,12 +104,14 @@ exports.deleteVehicle = async (req, res) => {
   try {
     const id = req.params.id
     const user = req.user
+    // console.log('user', user)
 
     const Product = await vehicleServices.getVehiclesById(id)
 
     if (!Product) return res.status(400).send('Not found')
     console.log(Product)
-    if (Product.createdBy != user.userId && !user.roles.includes('ADMIN'))
+
+    if (Product.createdBy != user.id && !user.roles.includes('ADMIN'))
       return res.status(403).send('Access denied')
 
     const response = await vehicleServices.deleteVehicle(id)

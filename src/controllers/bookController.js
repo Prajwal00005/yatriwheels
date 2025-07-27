@@ -1,5 +1,6 @@
 const bookingService = require('../services/bookServices') // Fixed file name
 const vehicleService = require('../services/VehiclesServices')
+
 exports.getAllBookings = async (req, res) => {
   try {
     const bookings = await bookingService.getAllBookings(req.query)
@@ -50,10 +51,11 @@ exports.createBooking = async (req, res) => {
 
     if (booking) {
       await vehicleService.updateVehicle(
-        { vehicleStatus: false },
-        input.vehicle
+        input.vehicle, // vehicle ID first
+        { vehicleStatus: false } // update data second
       )
     }
+
     res.status(201).json(booking)
   } catch (error) {
     res.status(error.statusCode || 500).json({ message: error.message })
@@ -140,6 +142,7 @@ exports.RejectBooking = async (req, res) => {
     const id = req.params.id
 
     const bookings = await bookingService.getBookingById(id)
+  
     if (!bookings) {
       return res.status(400).json({ message: 'Booking not available' })
     }
@@ -244,5 +247,71 @@ exports.completedBooking = async (req, res) => {
     console.error('Error confirming booking:', e)
 
     return res.status(500).json({ message: e.message })
+  }
+}
+
+// ----------------- PAYMENT HANDLERS ADDED -------------------
+const paymentService = require('../services/paymentServices')
+
+// Create a new payment (checkout)
+exports.checkoutPayment = async (req, res) => {
+  try {
+    const bookingId = req.params.id
+    const paymentInput = req.body
+
+    const paymentData = {
+      booking: bookingId,
+      ...paymentInput
+    }
+
+    const paymentResult = await paymentService.createPayment(paymentData)
+
+    res.status(200).json(paymentResult)
+  } catch (error) {
+    res.status(error.statusCode || 500).json({ message: error.message })
+  }
+}
+
+// Confirm payment status update
+exports.confirmPayment = async (req, res) => {
+  try {
+    const bookingId = req.params.id
+    const { status } = req.body
+
+    if (!status) {
+      return res
+        .status(422)
+        .json({ message: 'Payment confirm status is required' })
+    }
+
+    const paymentConfirmed = await paymentService.confirmPayment(
+      bookingId,
+      status
+    )
+
+    res.status(200).json(paymentConfirmed)
+  } catch (error) {
+    res.status(error.statusCode || 500).json({ message: error.message })
+  }
+}
+
+// Optional: get all payments (admin)
+exports.getAllPayments = async (req, res) => {
+  try {
+    const payments = await paymentService.getPayments()
+    res.status(200).json(payments)
+  } catch (error) {
+    res.status(error.statusCode || 500).json({ message: error.message })
+  }
+}
+
+// Optional: get payment by ID
+exports.getPaymentById = async (req, res) => {
+  try {
+    const payment = await paymentService.getPaymentById(req.params.id)
+    if (!payment) return res.status(404).json({ message: 'Payment not found' })
+    res.status(200).json(payment)
+  } catch (error) {
+    res.status(error.statusCode || 500).json({ message: error.message })
   }
 }

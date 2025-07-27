@@ -1,26 +1,19 @@
 const mongoose = require('mongoose')
 
 const paymentSchema = new mongoose.Schema({
-  amount: {
-    type: Number,
+  booking: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Booking',
     required: true
   },
-  Vat: {
-    type: Number
-  },
-  paymentMethod: {
+  amount: { type: Number, required: true },
+  status: {
     type: String,
-    enum: ['CASH', 'MOBILEBANKING']
+    enum: ['PENDING', 'CONFIRMED', 'FAILED'],
+    default: 'PENDING'
   },
-  paymentStatus: {
-    type: String,
-    enum: ['PENDING', 'COMPLETED', 'FAILED']
-  },
-  BookingId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Booking'
-  },
+  khaltiPidx: { type: String }, // Store Khalti transaction ID
+  createdAt: { type: Date, default: Date.now }
 })
 
-const Payment = mongoose.model("Payment",paymentSchema);
-module.exports = Payment;
+module.exports = mongoose.model('Payment', paymentSchema)
