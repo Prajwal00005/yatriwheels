@@ -1,6 +1,4 @@
 node_modules/
 uploads/
-
-.DS_Store
-
 .env
+.DS_Store
